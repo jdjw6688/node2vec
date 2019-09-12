@@ -28,7 +28,7 @@ abstract class AbstractParams[T: TypeTag] {
 
   private def tag: TypeTag[T] = typeTag[T]
 
-  /**
+  /**convertToNode2VecGraph
     * Finds all case class fields in concrete class instance, and outputs them in JSON-style format:
     * {
     *   [field name]:\t[field value]\n

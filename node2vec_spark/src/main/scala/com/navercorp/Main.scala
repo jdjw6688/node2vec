@@ -4,6 +4,7 @@ import java.io.Serializable
 import org.apache.spark.{SparkContext, SparkConf}
 import scopt.OptionParser
 import com.navercorp.lib.AbstractParams
+import com.navercorp.lib.Time
 
 object Main {
   object Command extends Enumeration {
@@ -26,9 +27,9 @@ object Main {
                     degree: Int = 30,
                     indexed: Boolean = true,
                     nodePath: String = null,
-                    input: String = null,
-                    output: String = null,
-                    cmd: Command = Command.node2vec) extends AbstractParams[Params] with Serializable
+                    input: String = "recsys/model/summary/short2short/video_pair/" + Time.somePt(-1),
+                    output: String = "recsys/model/summary/short2short/randomwalk/" + Time.somePt(-1),
+                    cmd: Command = Command.randomwalk) extends AbstractParams[Params] with Serializable
   val defaultParams = Params()
   
   val parser = new OptionParser[Params]("Node2Vec_Spark") {
@@ -61,15 +62,15 @@ object Main {
             .text("Input node2index file path: empty")
             .action((x, c) => c.copy(nodePath = x))
     opt[String]("input")
-            .required()
+            //.required()
             .text("Input edge file path: empty")
             .action((x, c) => c.copy(input = x))
     opt[String]("output")
-            .required()
+            //.required()
             .text("Output path: empty")
             .action((x, c) => c.copy(output = x))
     opt[String]("cmd")
-            .required()
+            //.required()
             .text(s"command: ${defaultParams.cmd.toString}")
             .action((x, c) => c.copy(cmd = Command.withName(x)))
     note(
