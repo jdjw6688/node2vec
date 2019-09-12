@@ -49,13 +49,13 @@ object Node2vec extends Serializable {
       }
         
       (nodeId, NodeAttr(neighbors = neighbors_.distinct))
-    }.repartition(800).cache
+    }.repartition(1000).cache
     
     indexedEdges = indexedNodes.flatMap { case (srcId, clickNode) =>
       clickNode.neighbors.map { case (dstId, weight) =>
           Edge(srcId, dstId, EdgeAttr())
       }
-    }.repartition(800).cache
+    }.repartition(1000).cache
     
     this
   }
@@ -87,7 +87,7 @@ object Node2vec extends Serializable {
   def randomWalk(): this.type = {
     val edge2attr = graph.triplets.map { edgeTriplet =>
       (s"${edgeTriplet.srcId}${edgeTriplet.dstId}", edgeTriplet.attr)
-    }.repartition(800).cache
+    }.repartition(1000).cache
     edge2attr.first
     
     for (iter <- 0 until config.numWalks) {
@@ -159,7 +159,7 @@ object Node2vec extends Serializable {
               Try(pathBuffer.mkString("\t")).getOrElse(null)
             }
             .filter(x => x != null && x.replaceAll("\\s", "").length > 0)
-            .repartition(800)
+            .repartition(1000)
             .saveAsTextFile(config.output)
     
     this
@@ -184,11 +184,11 @@ object Node2vec extends Serializable {
       
       node2vector.join(id2Node)
               .map { case (nodeId, (vector, name)) => s"$name\t$vector" }
-              .repartition(800)
+              .repartition(1000)
               .saveAsTextFile(s"${config.output}.emb")
     } else {
       node2vector.map { case (nodeId, vector) => s"$nodeId\t$vector" }
-              .repartition(800)
+              .repartition(1000)
               .saveAsTextFile(s"${config.output}.emb")
     }
     
