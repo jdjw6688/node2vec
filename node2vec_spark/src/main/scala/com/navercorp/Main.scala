@@ -1,7 +1,9 @@
 package com.navercorp
 
 import java.io.Serializable
-import org.apache.spark.{SparkContext, SparkConf}
+
+import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.hadoop.fs.{FileSystem, Path}
 import scopt.OptionParser
 import com.navercorp.lib.AbstractParams
 import com.navercorp.lib.Time
@@ -27,6 +29,7 @@ object Main {
                     degree: Int = 30,
                     indexed: Boolean = true,
                     nodePath: String = null,
+                    deletePath:String = "recsys/model/summary/short2short/randomwalk/" + Time.somePt(-15),
                     input: String = "recsys/model/summary/short2short/video_pair/" + Time.somePt(-1),
                     output: String = "recsys/model/summary/short2short/randomwalk/" + Time.somePt(-1),
                     cmd: Command = Command.randomwalk) extends AbstractParams[Params] with Serializable
@@ -61,6 +64,8 @@ object Main {
     opt[String]("nodePath")
             .text("Input node2index file path: empty")
             .action((x, c) => c.copy(nodePath = x))
+    opt[String]("deletePath")
+            .action((x,c)=>c.copy(deletePath = x))
     opt[String]("input")
             //.required()
             .text("Input edge file path: empty")
@@ -94,6 +99,10 @@ object Main {
     parser.parse(args, defaultParams).map { param =>
       val conf = new SparkConf().setAppName("Node2Vec")
       val context: SparkContext = new SparkContext(conf)
+
+      //删除15天前的数据
+      val fs = FileSystem.get(context.hadoopConfiguration)
+      if(fs.exists(new Path(param.deletePath))) fs.delete(new Path(param.deletePath),true)
       
       Node2vec.setup(context, param)
       
